@@ -21,27 +21,27 @@ def cli(verbose):
 @click.argument('question')
 @click.option('--top-k', default=5, help='Number of top results to retrieve')
 @click.option('--include-sources', is_flag=True, default=True, help='Include source information')
+@click.option('--agent-type', type=click.Choice(['rag', 'react']), default='rag', help='Agent type to use: rag or react')
 @click.option('--output', '-o', help='Output file for results')
-def query(question, top_k, include_sources, output):
+def query(question, top_k, include_sources, agent_type, output):
     """Query the RAG pipeline with a question."""
     try:
         pipeline = RAGPipeline()
-        result = pipeline.query(question, top_k, include_sources)
-        
+        result = pipeline.query(question, top_k, include_sources, agent_type=agent_type)
         if output:
             with open(output, 'w') as f:
                 json.dump(result, f, indent=2)
             click.echo(f"Results saved to {output}")
         else:
             click.echo(f"Question: {result['query']}")
+            click.echo(f"Agent: {result.get('agent', agent_type)}")
             click.echo(f"Response: {result['response']}")
-            if result['sources']:
+            if agent_type == 'rag' and result.get('sources'):
                 click.echo(f"\nSources ({result['num_sources']}):")
                 for i, source in enumerate(result['sources'], 1):
-                    click.echo(f"{i}. {source['source']} (score: {source['score']:.3f})")
+                    click.echo(f"{i}. {source['source']} (score: {source.get('score', 0):.3f})")
                     click.echo(f"   {source['content'][:100]}...")
                     click.echo()
-    
     except Exception as e:
         click.echo(f"Error: {e}", err=True)
 

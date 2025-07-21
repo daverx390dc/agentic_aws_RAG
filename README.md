@@ -198,13 +198,18 @@ python scripts/cli.py ingest file1.txt file2.txt -s "source1" -s "source2"
 
 #### Query the Pipeline
 ```bash
-# Simple query
+# Simple query with default (RAG) agent
 python scripts/cli.py query "What is machine learning?"
 # Or inside Docker:
 docker-compose exec rag-pipeline python scripts/cli.py query "What is machine learning?"
 
+# Use the ReAct agent for advanced reasoning and tool use
+python scripts/cli.py query "What is machine learning?" --agent-type react
+# Or inside Docker:
+docker-compose exec rag-pipeline python scripts/cli.py query "What is machine learning?" --agent-type react
+
 # With options
-python scripts/cli.py query "Explain neural networks" --top-k 10 --include-sources
+python scripts/cli.py query "Explain neural networks" --top-k 10 --include-sources --agent-type rag
 
 # Batch queries
 python scripts/cli.py batch-query "What is AI?" "How does ML work?" "Explain deep learning"
@@ -212,6 +217,13 @@ python scripts/cli.py batch-query "What is AI?" "How does ML work?" "Explain dee
 # From file
 python scripts/cli.py batch-query --input-file questions.txt
 ```
+
+### Agent Types
+
+- **RAG agent (default):** Uses retrieval-augmented generation for question answering.
+- **ReAct agent:** Uses LangChain's ReAct agent type, combining reasoning and tool-calling (search and summarization) for more complex, multi-step queries.
+
+To use the ReAct agent, add `--agent-type react` to your CLI query command.
 
 #### Get Suggestions
 ```bash

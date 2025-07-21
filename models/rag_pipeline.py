@@ -5,6 +5,7 @@ from typing import List, Dict, Any, Optional
 from loguru import logger
 from agents.document_processor_agent import DocumentProcessorAgent
 from agents.query_agent import QueryAgent
+from agents.react_agent import ReActAgent
 from config.settings import settings
 
 class RAGPipeline:
@@ -12,6 +13,7 @@ class RAGPipeline:
     def __init__(self):
         self.document_processor = DocumentProcessorAgent()
         self.query_agent = QueryAgent()
+        self.react_agent = ReActAgent()
         logger.info("LangChain-based RAG Pipeline initialized")
 
     def ingest_documents(self, file_paths: List[str], source_names: Optional[List[str]] = None) -> Dict[str, Any]:
@@ -37,8 +39,16 @@ class RAGPipeline:
     def ingest_directory(self, directory_path: str) -> List[Dict[str, Any]]:
         return self.document_processor.process_directory(directory_path)
 
-    def query(self, question: str, top_k: int = 5, include_sources: bool = True) -> Dict[str, Any]:
-        return self.query_agent.process_query(question, top_k, include_sources)
+    def query(self, question: str, top_k: int = 5, include_sources: bool = True, agent_type: str = "rag") -> Dict[str, Any]:
+        """Query the pipeline with a question using the specified agent type ('rag' or 'react')."""
+        if agent_type == "react":
+            try:
+                response = self.react_agent.run(question)
+                return {"success": True, "response": response, "agent": "react", "query": question}
+            except Exception as e:
+                return {"success": False, "response": str(e), "agent": "react", "query": question}
+        else:
+            return self.query_agent.process_query(question, top_k, include_sources)
 
     def batch_query(self, questions: List[str], top_k: int = 5) -> List[Dict[str, Any]]:
         return self.query_agent.batch_process_queries(questions, top_k)
