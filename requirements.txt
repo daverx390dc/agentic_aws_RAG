@@ -23,6 +23,7 @@ pydantic-settings>=2.0.0
 
 # Text processing
 langchain>=0.1.0
+langgraph>=0.0.10
 langchain-community>=0.0.10
 langchain-aws>=0.1.0
 

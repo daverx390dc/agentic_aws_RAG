@@ -1,3 +1,8 @@
+# DEPRECATED: This file is no longer used. Bedrock is now handled via LangChain's embedding and LLM wrappers.
+# All logic should be migrated to use langchain_community.embeddings.BedrockEmbeddings and related classes.
+
+raise NotImplementedError("This module is deprecated. Use LangChain's BedrockEmbeddings instead.")
+
 """
 AWS Bedrock service for LLM and embedding operations.
 """

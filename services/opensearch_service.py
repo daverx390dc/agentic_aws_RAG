@@ -1,3 +1,8 @@
+# DEPRECATED: This file is no longer used. OpenSearch is now handled via LangChain's vectorstore integrations.
+# All logic should be migrated to use langchain_community.vectorstores.OpenSearchVectorSearch.
+
+raise NotImplementedError("This module is deprecated. Use LangChain's OpenSearchVectorSearch instead.")
+
 """
 OpenSearch service for vector storage and retrieval.
 """

@@ -78,7 +78,7 @@ def main():
         # Example 6: Get pipeline statistics
         logger.info("\nExample 6: Pipeline statistics")
         stats = pipeline.get_pipeline_stats()
-        logger.info(f"Total documents: {stats.get('opensearch', {}).get('total_documents', 0)}")
+        logger.info(f"Total documents: {stats.get('vectorstore', {}).get('total_documents', 0)}")
         
         logger.info("\nExample completed successfully!")
         
