@@ -1,13 +1,13 @@
-# RAG Pipeline with AWS Bedrock and OpenSearch
+# RAG Pipeline with LangChain, AWS Bedrock, and OpenSearch
 
-A comprehensive Retrieval-Augmented Generation (RAG) pipeline built with Python, featuring AI agents, AWS Bedrock (Claude Sonnet 3 + Titan embeddings), and OpenSearch for vector storage.
+A comprehensive Retrieval-Augmented Generation (RAG) pipeline built with Python, now powered by [LangChain](https://python.langchain.com/) and [LangGraph](https://github.com/langchain-ai/langgraph), featuring AI agents, AWS Bedrock (Claude Sonnet 3 + Titan embeddings), and OpenSearch for vector storage.
 
 ## 🚀 Features
 
-- **Modular Architecture**: Clean, scalable folder structure with separated concerns
-- **AI Agents**: Specialized agents for document processing and query handling
-- **AWS Bedrock Integration**: Uses Claude Sonnet 3 for LLM and Titan for embeddings
-- **OpenSearch Vector Database**: High-performance vector storage and similarity search
+- **Modern LangChain Architecture**: Uses LangChain and LangGraph for agent orchestration and RAG
+- **AI Agents**: Specialized agents for document processing and query handling, built on LangChain
+- **AWS Bedrock Integration**: Uses Claude Sonnet 3 for LLM and Titan for embeddings via LangChain wrappers
+- **OpenSearch Vector Database**: High-performance vector storage and similarity search via LangChain
 - **Multiple Interfaces**: REST API, CLI, and programmatic access
 - **Document Support**: PDF, DOCX, TXT, HTML files
 - **Advanced Features**: Query analysis, suggestions, batch processing, health monitoring
@@ -16,7 +16,7 @@ A comprehensive Retrieval-Augmented Generation (RAG) pipeline built with Python,
 
 ```
 rag_pipeline/
-├── agents/                 # AI agents for different tasks
+├── agents/                 # AI agents (LangChain-based)
 │   ├── document_processor_agent.py
 │   └── query_agent.py
 ├── config/                 # Configuration files
@@ -26,9 +26,9 @@ rag_pipeline/
 │   └── example_document.txt
 ├── models/                 # Core pipeline models
 │   └── rag_pipeline.py
-├── services/               # External service integrations
-│   ├── bedrock_service.py
-│   ├── opensearch_service.py
+├── services/               # (Deprecated) Custom service integrations (now handled by LangChain)
+│   ├── bedrock_service.py  # Deprecated
+│   ├── opensearch_service.py # Deprecated
 │   └── api_service.py
 ├── utils/                  # Utility functions
 │   ├── logger.py
@@ -41,6 +41,8 @@ rag_pipeline/
 ├── requirements.txt        # Python dependencies
 └── README.md              # This file
 ```
+
+> **Note:** `services/bedrock_service.py` and `services/opensearch_service.py` are now deprecated. All Bedrock and OpenSearch logic is handled via LangChain's wrappers.
 
 ## 🛠️ Installation
 
@@ -244,18 +246,18 @@ analysis = pipeline.analyze_query("What is the difference between AI and ML?")
 health = pipeline.health_check()
 ```
 
-## 🔧 AI Agents
+## 🔧 AI Agents (LangChain-based)
 
 ### Document Processor Agent
-- Handles document ingestion and preprocessing
+- Handles document ingestion and preprocessing using LangChain document loaders and splitters
 - Supports multiple file formats (PDF, DOCX, TXT, HTML)
-- Generates embeddings using Titan model
-- Indexes documents in OpenSearch
+- Generates embeddings using LangChain's BedrockEmbeddings
+- Indexes documents in OpenSearch via LangChain's OpenSearchVectorSearch
 
 ### Query Agent
-- Processes user queries
-- Performs vector similarity search
-- Generates responses using Claude Sonnet 3
+- Processes user queries using LangChain's RetrievalQA and agent framework
+- Performs vector similarity search via LangChain
+- Generates responses using Claude Sonnet 3 (via Bedrock)
 - Provides query analysis and suggestions
 
 ## 🏗️ Architecture
@@ -266,16 +268,17 @@ health = pipeline.health_check()
 └─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
           │                      │                      │
           ▼                      ▼                      ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│  Query Agent    │    │Document Processor│    │  RAG Pipeline   │
-│                 │    │     Agent       │    │   Orchestrator  │
-└─────────┬───────┘    └─────────┬───────┘    └─────────┬───────┘
-          │                      │                      │
-          ▼                      ▼                      ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│ AWS Bedrock     │    │ AWS Bedrock     │    │   OpenSearch    │
-│ Claude Sonnet 3 │    │ Titan Embeddings│    │ Vector Database │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌───────────────────────────────┐
+│   LangChain Agents & Chains  │
+│  (QueryAgent, DocProcessor)  │
+└─────────┬─────────────────────┘
+          │
+          ▼
+┌─────────────────┐    ┌─────────────────┐
+│ AWS Bedrock     │    │   OpenSearch    │
+│ Claude Sonnet 3 │    │ Vector Database │
+│ Titan Embedding │    └─────────────────┘
+└─────────────────┘
 ```
 
 ## 🧪 Testing
