@@ -39,6 +39,9 @@ rag_pipeline/
 ├── docs/                   # Documentation
 ├── main.py                 # Main entry point
 ├── requirements.txt        # Python dependencies
+├── Dockerfile              # Docker build file
+├── docker-compose.yml      # Docker Compose orchestration
+├── .dockerignore           # Docker ignore file
 └── README.md              # This file
 ```
 
@@ -51,9 +54,9 @@ rag_pipeline/
 1. **Python 3.8+**
 2. **OpenSearch** (local or cloud instance)
 3. **AWS Account** with Bedrock access
-4. **Docker** (optional, for OpenSearch)
+4. **Docker** (optional, for OpenSearch or full containerization)
 
-### Setup
+### Setup (Local)
 
 1. **Clone and navigate to the project:**
    ```bash
@@ -82,6 +85,46 @@ rag_pipeline/
      -e "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" \
      opensearchproject/opensearch:latest
    ```
+
+## 🐳 Docker & Containerization
+
+This project is fully containerized for easy deployment and development.
+
+### Build and Run with Docker Compose
+
+1. **Copy and configure your environment variables:**
+   ```bash
+   cp config/env.example .env
+   # Edit .env as needed
+   ```
+
+2. **Build and start the stack:**
+   ```bash
+   docker-compose up --build
+   ```
+   This will start both the RAG pipeline app and an OpenSearch instance.
+
+3. **Access the services:**
+   - RAG API: [http://localhost:8000](http://localhost:8000)
+   - OpenSearch: [http://localhost:9200](http://localhost:9200)
+
+4. **Run CLI commands inside the container:**
+   ```bash
+   docker-compose exec rag-pipeline python scripts/cli.py health
+   docker-compose exec rag-pipeline python scripts/cli.py ingest data/example_document.txt
+   docker-compose exec rag-pipeline python scripts/cli.py query "What is machine learning?"
+   ```
+
+5. **Stop and remove containers:**
+   ```bash
+   docker-compose down
+   ```
+
+### Dockerfile
+- The `Dockerfile` builds the app image, installs all dependencies, and sets up the default entrypoint to run `main.py`.
+
+### .dockerignore
+- The `.dockerignore` file ensures that unnecessary files (e.g., `.git`, `__pycache__`, `.env`, logs) are not copied into the Docker image.
 
 ## ⚙️ Configuration
 
@@ -128,18 +171,26 @@ LOG_LEVEL=INFO
 #### Health Check
 ```bash
 python scripts/cli.py health
+# Or inside Docker:
+docker-compose exec rag-pipeline python scripts/cli.py health
 ```
 
 #### Ingest Documents
 ```bash
 # Single file
 python scripts/cli.py ingest data/example_document.txt
+# Or inside Docker:
+docker-compose exec rag-pipeline python scripts/cli.py ingest data/example_document.txt
 
 # Multiple files
 python scripts/cli.py ingest file1.txt file2.pdf file3.docx
+# Or inside Docker:
+docker-compose exec rag-pipeline python scripts/cli.py ingest file1.txt file2.pdf file3.docx
 
 # Directory
 python scripts/cli.py ingest-dir /path/to/documents/
+# Or inside Docker:
+docker-compose exec rag-pipeline python scripts/cli.py ingest-dir /app/data/
 
 # With custom source names
 python scripts/cli.py ingest file1.txt file2.txt -s "source1" -s "source2"
@@ -149,6 +200,8 @@ python scripts/cli.py ingest file1.txt file2.txt -s "source1" -s "source2"
 ```bash
 # Simple query
 python scripts/cli.py query "What is machine learning?"
+# Or inside Docker:
+docker-compose exec rag-pipeline python scripts/cli.py query "What is machine learning?"
 
 # With options
 python scripts/cli.py query "Explain neural networks" --top-k 10 --include-sources
@@ -180,6 +233,8 @@ python scripts/cli.py stats
 #### Start the API Server
 ```bash
 python services/api_service.py
+# Or inside Docker (if you change the entrypoint):
+docker-compose exec rag-pipeline python services/api_service.py
 ```
 
 The API will be available at `http://localhost:8000`
@@ -286,6 +341,8 @@ health = pipeline.health_check()
 Run tests:
 ```bash
 pytest tests/
+# Or inside Docker:
+docker-compose exec rag-pipeline pytest tests/
 ```
 
 ## 📊 Monitoring
@@ -293,11 +350,15 @@ pytest tests/
 ### Health Check
 ```bash
 python scripts/cli.py health
+# Or inside Docker:
+docker-compose exec rag-pipeline python scripts/cli.py health
 ```
 
 ### Statistics
 ```bash
 python scripts/cli.py stats
+# Or inside Docker:
+docker-compose exec rag-pipeline python scripts/cli.py stats
 ```
 
 ### Logs
