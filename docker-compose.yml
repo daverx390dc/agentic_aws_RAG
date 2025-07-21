@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  rag-pipeline:
+    build: .
+    container_name: rag-pipeline
+    env_file:
+      - .env
+    depends_on:
+      - opensearch
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    command: ["python", "main.py"]
+
+  opensearch:
+    image: opensearchproject/opensearch:2.11.1
+    container_name: opensearch
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=admin"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 30s
+      timeout: 10s
+      retries: 5 
